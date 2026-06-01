@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, integer, pgEnum } from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 
 const vector = customType<{ data: number[]; driverData: string; config: { length: number } }>({
@@ -14,13 +14,16 @@ const vector = customType<{ data: number[]; driverData: string; config: { length
   },
 });
 
+export const messageRoleEnum = pgEnum("message_role", ["user", "assistant"]);
+export const planEnum = pgEnum("plan", ["free", "pro"]);
+
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
-  plan: text("plan").default("free").notNull(), // "free" | "pro"
+  plan: planEnum("plan").default("free").notNull(),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -154,7 +157,7 @@ export const message = pgTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    role: text("role").notNull(), // "user" | "assistant"
+    role: messageRoleEnum('role').notNull(),
     content: text("content").notNull(),
     conversationId: text("conversation_id")
       .notNull()

@@ -16,7 +16,7 @@ export function useAuth() {
         },
         onSuccess: () => {
           toast.success("welcome to nexus");
-          router.push("/dashboard");
+          router.push("/chat");
         },
       },
     });

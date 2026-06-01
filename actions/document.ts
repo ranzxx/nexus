@@ -2,7 +2,7 @@
 
 import { db } from "@/db/drizzle";
 import { document, chunk } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, count, eq, gte } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -26,7 +26,30 @@ export async function processDocument({
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
-  // 1. Simpan dokumen ke database
+  const isPro = session.user.plan === "pro";
+
+  if (!isPro) {
+    // cek upload hari ini
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const [{ value }] = await db
+      .select({ value: count() })
+      .from(document)
+      .where(
+        and(
+          eq(document.userId, session.user.id),
+          gte(document.createdAt, startOfDay),
+        ),
+      );
+
+    if (value >= 5) {
+      throw new Error(
+        "Free plan limit: 5 documents per day. Upgrade to Pro for unlimited uploads.",
+      );
+    }
+  }
+
   const [doc] = await db
     .insert(document)
     .values({
@@ -38,20 +61,12 @@ export async function processDocument({
     })
     .returning();
 
-  // 2. Download file dari Uploadthing
   const response = await fetch(fileUrl);
   const buffer = Buffer.from(await response.arrayBuffer());
-
-  // 3. Extract teks
   const text = await extractTextFromPDF(buffer);
-
-  // 4. Split jadi chunks
   const chunks = splitIntoChunks(text);
-
-  // 5. Generate embeddings
   const embeddings = await generateDocumentEmbeddings(chunks);
 
-  // 6. Simpan chunks + embeddings ke database
   await db.insert(chunk).values(
     chunks.map((content, index) => ({
       content,
