@@ -4,6 +4,9 @@ const mocks = vi.hoisted(() => ({
   insertMock: vi.fn(),
   valuesMock: vi.fn(),
   returningMock: vi.fn(),
+  selectMock: vi.fn(),
+  fromMock: vi.fn(),
+  whereMock: vi.fn(),
   getSessionMock: vi.fn(),
   headersMock: vi.fn(),
   redirectMock: vi.fn(),
@@ -13,6 +16,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/db/drizzle", () => ({
   db: {
     insert: mocks.insertMock,
+    select: mocks.selectMock,
   },
 }));
 
@@ -59,6 +63,16 @@ describe("conversation", () => {
         updatedAt: new Date(),
       },
     ]);
+
+    mocks.selectMock.mockReturnValue({
+      from: mocks.fromMock,
+    });
+
+    mocks.fromMock.mockReturnValue({
+      where: mocks.whereMock,
+    });
+
+    mocks.whereMock.mockResolvedValue([{ value: 0 }]);
 
     mocks.getSessionMock.mockResolvedValue({
       user: {
