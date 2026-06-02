@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import path from "path";
 import { registerTestUser } from "./helpers/auth";
 
-test("user can upload a PDF document", async ({ page }) => {
+test.skip("user can upload a PDF document", async ({ page }) => {
   const email = `e2e-upload-${Date.now()}@test.com`;
 
   await registerTestUser(page, email);

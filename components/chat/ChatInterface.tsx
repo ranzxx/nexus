@@ -2,7 +2,6 @@
 
 import { useChat } from "@ai-sdk/react";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createConversation } from "@/actions/conversation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,7 +26,6 @@ export default function ChatInterface({
   initialMessages = [],
   initialDocumentId,
 }: Props) {
-  const router = useRouter();
   const [input, setInput] = useState("");
   const [conversationId, setConversationId] = useState<string | null>(
     initialConversationId ?? null,

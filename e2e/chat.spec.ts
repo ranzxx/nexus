@@ -58,6 +58,8 @@ test.describe("Chat", () => {
       timeout: 15_000,
     });
 
+    await page.waitForTimeout(3000);
+
     const conversationUrl = page.url();
 
     await page.reload();
