@@ -17,7 +17,7 @@ test.describe("Chat", () => {
     await registerTestUser(page, email);
     await page.goto("/chat");
 
-    await page.fill('input[placeholder="ask anything..."]', "hello nexus");
+    await page.getByTestId("chat-input").fill("hello nexus");
     await page.click('button[type="submit"]');
 
     await expect(page).toHaveURL(/\/chat\/[a-zA-Z0-9-]+/, {
@@ -31,7 +31,7 @@ test.describe("Chat", () => {
     await registerTestUser(page, email);
     await page.goto("/chat");
 
-    await page.fill('input[placeholder="ask anything..."]', "what is 2+2?");
+    await page.getByTestId("chat-input").fill("what is 2+2?");
     await page.click('button[type="submit"]');
 
     await expect(page).toHaveURL(/\/chat\/[a-zA-Z0-9-]+/, {
@@ -47,10 +47,7 @@ test.describe("Chat", () => {
     await registerTestUser(page, email);
     await page.goto("/chat");
 
-    await page.fill(
-      'input[placeholder="ask anything..."]',
-      "remember this: nexus e2e test",
-    );
+    await page.getByTestId("chat-input").fill("remember this: nexus e2e test");
 
     await page.click('button[type="submit"]');
 
