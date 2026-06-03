@@ -3,7 +3,7 @@ import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
-const auth = (req: Request) => ({ id: "fakeId" }); // Fake auth function
+const auth = () => ({ id: "fakeId" });
 
 export const ourFileRouter = {
   documentUploader: f({ pdf: { maxFileSize: "16MB", maxFileCount: 1 } })
@@ -19,8 +19,8 @@ export const ourFileRouter = {
       maxFileCount: 1,
     },
   })
-    .middleware(async ({ req }) => {
-      const user = await auth(req);
+    .middleware(async () => {
+      const user = await auth();
 
       if (!user) throw new UploadThingError("Unauthorized");
 

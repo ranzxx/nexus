@@ -17,7 +17,7 @@ export default function FileUpload({ onUploadComplete }: Props) {
         endpoint="documentUploader"
         appearance={{
           button:
-            "bg-transparent text-[#a1a1aa] hover:text-white hover:bg-white/10 border-none w-9 h-9 p-0 focus-within:ring-0 outline-none flex items-center justify-center rounded-lg transition-colors",
+            "!w-8 !h-8 !min-w-8 !max-w-8 !p-0 rounded-md !bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground flex items-center justify-center transition-colors",
           allowedContent: "hidden",
         }}
         content={{ button: <Plus className="w-5 h-5" /> }}
@@ -32,7 +32,16 @@ export default function FileUpload({ onUploadComplete }: Props) {
           onUploadComplete(doc.id);
         }}
         onUploadError={(error) => {
-          toast.error(error.message);
+          switch (true) {
+            case error.message.includes("InvalidFileType"):
+              toast.error("Please upload a PDF file only.");
+              break;
+            case error.message.includes("FileSize"):
+              toast.error("File size exceeds 16MB limit.");
+              break;
+            default:
+              toast.error("Upload failed. Please try again.");
+          }
         }}
       />
     </div>

@@ -78,15 +78,23 @@ async function getOrCreateConversation({
 
 export async function POST(request: Request) {
   try {
-    const {
-      messages,
-      documentId,
-      conversationId,
-    }: {
-      messages: UIMessage[];
+    let body: {
+      messages?: UIMessage[];
       documentId?: string;
       conversationId?: string;
-    } = await request.json();
+    };
+
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json("Invalid request body", { status: 400 });
+    }
+
+    const { messages, documentId, conversationId } = body;
+
+    if (!messages || !Array.isArray(messages)) {
+      return NextResponse.json("Invalid messages", { status: 400 });
+    }
 
     const session = await auth.api.getSession({
       headers: await headers(),
@@ -122,11 +130,10 @@ export async function POST(request: Request) {
       isPro,
     });
 
-    let systemPrompt = `You are a helpful assistant.${
-      isPro
+    let systemPrompt = `You are a helpful assistant.${isPro
         ? " You are running on a premium model with enhanced capabilities."
         : ""
-    }`;
+      }`;
 
     if (documentId) {
       const queryEmbedding = await generateQueryEmbedding(userText);
@@ -136,11 +143,10 @@ export async function POST(request: Request) {
         documentId,
       );
 
-      systemPrompt = `You are a helpful assistant.${
-        isPro
+      systemPrompt = `You are a helpful assistant.${isPro
           ? " You are running on a premium model with enhanced capabilities."
           : ""
-      }
+        }
 
 Answer questions based on the following document context:
 

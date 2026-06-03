@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
-import { LayoutDashboard } from "lucide-react";
 
 interface NavSidebarProps {
   href: string;

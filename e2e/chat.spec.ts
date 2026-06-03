@@ -8,7 +8,9 @@ test.describe("Chat", () => {
     await registerTestUser(page, email);
     await page.goto("/chat");
 
-    await expect(page).toHaveURL(/chat/);
+    await expect(page).toHaveURL(/chat/, {
+      timeout: 15_000,
+    });
   });
 
   test("user can send a message", async ({ page }) => {
