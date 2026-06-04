@@ -1,103 +1,213 @@
-import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  FileText,
+  Lock,
+  MessageSquare,
+  Search,
+  Zap,
+} from "lucide-react";
 
-export default function Home() {
+import { Button } from "@/components/ui/button";
+
+const features = [
+  {
+    icon: FileText,
+    title: "PDF Upload",
+    description: "Upload documents and make them searchable with AI.",
+  },
+  {
+    icon: Search,
+    title: "RAG Retrieval",
+    description: "Get answers grounded in your uploaded documents.",
+  },
+  {
+    icon: MessageSquare,
+    title: "Conversation History",
+    description: "Continue previous chats without losing context.",
+  },
+  {
+    icon: Lock,
+    title: "Secure Authentication",
+    description: "Protected user accounts and private conversations.",
+  },
+  {
+    icon: Zap,
+    title: "Fast AI Responses",
+    description: "Built with modern AI tooling for responsive chat.",
+  },
+];
+
+const steps = [
+  "Upload your PDF",
+  "Ask natural questions",
+  "Get context-aware answers",
+];
+
+export default function HomePage() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <main className="min-h-screen bg-[#09090b] text-white">
+      <header className="border-b border-zinc-800">
+        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
+          <Link href="/" className="text-xl font-semibold">
+            Nexus
+          </Link>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <div className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
+            <a href="#features" className="hover:text-white">
+              Features
+            </a>
+            <a href="#how-it-works" className="hover:text-white">
+              How it works
+            </a>
+            <Link href="/pricing" className="hover:text-white">
+              Pricing
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" className="hidden md:inline-flex">
+              <Link href="/login">Sign in</Link>
+            </Button>
+
+            <Button asChild>
+              <Link href="/register">Get started</Link>
+            </Button>
+          </div>
+        </nav>
+      </header>
+
+      <section className="mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center">
+        <div className="mb-6 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-1.5 text-sm text-zinc-400">
+          Built with RAG, PostgreSQL, pgvector, and AI SDK
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+        <h1 className="max-w-4xl text-4xl font-semibold tracking-tight md:text-6xl">
+          Turn PDFs into intelligent conversations
+        </h1>
+
+        <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">
+          Nexus helps you upload documents, ask questions, and get context-aware
+          answers powered by retrieval augmented generation.
+        </p>
+
+        <div className="mt-10 flex flex-col gap-3 sm:flex-row">
+          <Button asChild size="lg">
+            <Link href="/chat">
+              Start chatting
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+
+          <Button asChild size="lg" variant="outline">
+            <Link href="/pricing">View pricing</Link>
+          </Button>
+        </div>
+
+        <div className="mt-16 w-full max-w-5xl overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-950 shadow-2xl">
+          <div className="flex h-10 items-center gap-2 border-b border-zinc-800 px-4">
+            <span className="h-3 w-3 rounded-full bg-zinc-700" />
+            <span className="h-3 w-3 rounded-full bg-zinc-700" />
+            <span className="h-3 w-3 rounded-full bg-zinc-700" />
+          </div>
+
+          <div className="grid min-h-[360px] md:grid-cols-[260px_1fr]">
+            <aside className="hidden border-r border-zinc-800 bg-zinc-900/40 p-6 md:block">
+              <div className="mb-8 h-8 w-32 rounded bg-zinc-800" />
+              <div className="space-y-3">
+                <div className="h-10 rounded-lg bg-zinc-800" />
+                <div className="h-10 rounded-lg bg-zinc-800/60" />
+                <div className="h-10 rounded-lg bg-zinc-800/60" />
+              </div>
+            </aside>
+
+            <div className="flex flex-col justify-between p-6">
+              <div className="space-y-6">
+                <div className="max-w-xl rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-left">
+                  <div className="mb-3 h-4 w-40 rounded bg-zinc-700" />
+                  <div className="h-3 w-full rounded bg-zinc-800" />
+                </div>
+
+                <div className="ml-auto max-w-xl rounded-xl border border-blue-500/40 bg-blue-500/10 p-4 text-left">
+                  <div className="mb-3 h-4 w-52 rounded bg-blue-300/40" />
+                  <div className="h-3 w-full rounded bg-blue-300/30" />
+                </div>
+              </div>
+
+              <div className="mt-10 rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-left text-sm text-zinc-400">
+                Ask Nexus anything about your uploaded PDF...
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" className="mx-auto max-w-7xl px-6 py-20">
+        <div className="text-center">
+          <h2 className="text-3xl font-semibold">Powerful capabilities</h2>
+          <p className="mt-3 text-zinc-400">
+            Everything you need to interact with your documents.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {features.map((feature) => (
+            <div
+              key={feature.title}
+              className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6"
+            >
+              <feature.icon className="mb-5 h-5 w-5 text-blue-400" />
+              <h3 className="font-medium">{feature.title}</h3>
+              <p className="mt-2 text-sm leading-6 text-zinc-400">
+                {feature.description}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section id="how-it-works" className="mx-auto max-w-5xl px-6 py-20">
+        <div className="text-center">
+          <h2 className="text-3xl font-semibold">How it works</h2>
+          <p className="mt-3 text-zinc-400">
+            From document upload to grounded answers in seconds.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-4 md:grid-cols-3">
+          {steps.map((step, index) => (
+            <div
+              key={step}
+              className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-6"
+            >
+              <div className="mb-5 flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-sm font-semibold text-white">
+                {index + 1}
+              </div>
+              <h3 className="font-medium">{step}</h3>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-6 py-24 text-center">
+        <h2 className="text-3xl font-semibold">
+          Ready to chat with your documents?
+        </h2>
+        <p className="mt-3 text-zinc-400">
+          Start using Nexus and turn static PDFs into useful conversations.
+        </p>
+
+        <Button asChild size="lg" className="mt-8">
+          <Link href="/chat">Start chatting</Link>
+        </Button>
+      </section>
+
+      <footer className="border-t border-zinc-800">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-zinc-500 md:flex-row md:items-center md:justify-between">
+          <p className="font-medium text-zinc-300">Nexus</p>
+          <p>© 2026 Nexus AI. All rights reserved.</p>
+        </div>
       </footer>
-    </div>
+    </main>
   );
 }

@@ -8,8 +8,14 @@ export default async function ProfilePage() {
   });
 
   return (
-    <div className="max-w-lg">
-      <h1 className="text-2xl font-semibold mb-6">Profile</h1>
+    <div className="mx-auto w-full max-w-5xl px-8 py-8 space-y-8">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Profile</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Manage your account information and profile settings.
+        </p>
+      </div>
+
       <ProfileForm user={session?.user} />
     </div>
   );

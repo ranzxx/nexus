@@ -32,6 +32,7 @@ export const config = {
   matcher: [
     '/profile',
     "/chat/:path*",
+    "/upgrade",
     "/login",
     "/register",
   ],
