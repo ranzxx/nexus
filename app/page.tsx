@@ -60,7 +60,7 @@ export default function HomePage() {
             <a href="#how-it-works" className="hover:text-white">
               How it works
             </a>
-            <Link href="/pricing" className="hover:text-white">
+            <Link href="/upgrade" className="hover:text-white">
               Pricing
             </Link>
           </div>
@@ -100,7 +100,7 @@ export default function HomePage() {
           </Button>
 
           <Button asChild size="lg" variant="outline">
-            <Link href="/pricing">View pricing</Link>
+            <Link href="/upgrade">View pricing</Link>
           </Button>
         </div>
 
