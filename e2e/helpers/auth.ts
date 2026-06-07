@@ -1,4 +1,3 @@
-// e2e/helpers/auth.ts
 import type { Page } from "@playwright/test";
 
 export async function registerTestUser(page: Page, email: string) {
@@ -10,8 +9,9 @@ export async function registerTestUser(page: Page, email: string) {
 
   await page.click('button[type="submit"]');
 
-  await page.waitForURL(/\/chat$/, {
-    timeout: 10_000,
+  // pakai /chat tanpa $ supaya match /chat, /chat/, /chat?...
+  await page.waitForURL(/\/chat/, {
+    timeout: 15_000,
   });
 }
 
@@ -22,4 +22,8 @@ export async function login(page: Page, email: string) {
   await page.fill('input[name="password"]', "password123");
 
   await page.click('button[type="submit"]');
+
+  await page.waitForURL(/\/chat/, {
+    timeout: 15_000,
+  });
 }
