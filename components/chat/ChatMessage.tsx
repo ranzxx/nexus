@@ -4,12 +4,15 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User } from "lucide-react";
 import { MarkdownRenderer } from "./MarkdownRenderer";
 
-// Using a generic message type compatible with ai-sdk
 type Message = {
   id: string;
   role: "user" | "assistant" | "system" | "data";
-  content: string;
-  parts?: Array<{ type: string; text: string }>;
+  content?: string;
+  parts?: Array<{
+    type: string;
+    text?: string;
+    [key: string]: unknown;
+  }>;
 };
 
 interface ChatMessageProps {
@@ -37,7 +40,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         }`}
       >
         {message.role === "user" ? (
-          <span className="whitespace-pre-wrap break-words">{textContent}</span>
+          <span className="whitespace-pre-wrap wrap-break-word">{textContent}</span>
         ) : (
           <MarkdownRenderer content={textContent} />
         )}

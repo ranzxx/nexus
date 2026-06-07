@@ -36,3 +36,12 @@ export const ourFileRouter = {
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+import {
+  generateUploadButton,
+  generateUploadDropzone,
+  generateReactHelpers,
+} from "@uploadthing/react";
+
+export const UploadButton = generateUploadButton<OurFileRouter>();
+export const UploadDropzone = generateUploadDropzone<OurFileRouter>();
+export const { useUploadThing } = generateReactHelpers<OurFileRouter>();

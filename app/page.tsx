@@ -111,7 +111,7 @@ export default function HomePage() {
             <span className="h-3 w-3 rounded-full bg-zinc-700" />
           </div>
 
-          <div className="grid min-h-[360px] md:grid-cols-[260px_1fr]">
+          <div className="grid min-h-90 md:grid-cols-[260px_1fr]">
             <aside className="hidden border-r border-zinc-800 bg-zinc-900/40 p-6 md:block">
               <div className="mb-8 h-8 w-32 rounded bg-zinc-800" />
               <div className="space-y-3">

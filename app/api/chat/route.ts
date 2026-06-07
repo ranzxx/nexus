@@ -130,10 +130,11 @@ export async function POST(request: Request) {
       isPro,
     });
 
-    let systemPrompt = `You are a helpful assistant.${isPro
+    let systemPrompt = `You are a helpful assistant.${
+      isPro
         ? " You are running on a premium model with enhanced capabilities."
         : ""
-      }`;
+    }`;
 
     if (documentId) {
       const queryEmbedding = await generateQueryEmbedding(userText);
@@ -143,10 +144,11 @@ export async function POST(request: Request) {
         documentId,
       );
 
-      systemPrompt = `You are a helpful assistant.${isPro
+      systemPrompt = `You are a helpful assistant.${
+        isPro
           ? " You are running on a premium model with enhanced capabilities."
           : ""
-        }
+      }
 
 Answer questions based on the following document context:
 

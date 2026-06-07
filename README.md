@@ -1,36 +1,248 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Nexus
+
+An AI-powered chatbot platform that lets you upload PDF documents and chat with your data using Retrieval-Augmented Generation (RAG) — built as a production-grade SaaS with authentication, subscriptions, and testing.
+
+🔗 **Live Demo**: [nexus.vercel.app](#)
+
+---
+
+## Screenshots
+
+![Chat Interface](./public/screenshots/rag.png)
+
+---
+
+## Features
+
+- AI chat powered by Groq LLMs (llama-3.1-8b for Free, llama-3.3-70b for Pro)
+- PDF upload and processing with text extraction
+- Retrieval-Augmented Generation (RAG) — chat with your documents
+- Semantic search using Cohere embeddings + pgvector
+- Conversation history with rename and delete
+- Authentication with Better Auth
+- Stripe subscription (Free and Pro plans)
+- Docker support for local development
+- Unit tests with Vitest
+- End-to-end tests with Playwright
+- CI/CD with GitHub Actions
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|---|---|
+| Framework | Next.js 15 (App Router) |
+| Language | TypeScript |
+| Styling | Tailwind CSS + shadcn/ui |
+| Database | PostgreSQL + pgvector (Docker locally, Neon in production) |
+| ORM | Drizzle ORM |
+| Auth | Better Auth |
+| AI | Groq + Vercel AI SDK v6 |
+| Embeddings | Cohere |
+| File Storage | Uploadthing |
+| Payments | Stripe |
+| Infrastructure | Docker + Docker Compose |
+| Testing | Vitest + Playwright |
+| Deployment | Vercel |
+
+---
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- Docker (for local PostgreSQL + pgvector)
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/ranzxx/nexus.git
+cd nexus
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Set up environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+Fill in your `.env.local`:
+
+```env
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/nexus_dev
+
+# Auth
+BETTER_AUTH_SECRET=
+BETTER_AUTH_URL=http://localhost:3000
+
+# AI
+GROQ_API_KEY=
+COHERE_API_KEY=
+
+# File Storage
+UPLOADTHING_TOKEN=
+
+# Stripe
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRO_PRICE_ID=
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 4. Start PostgreSQL with pgvector
+
+```bash
+docker compose up -d
+```
+
+### 5. Enable pgvector extension
+
+```bash
+docker compose exec postgres psql -U postgres -d nexus_dev -c "CREATE EXTENSION IF NOT EXISTS vector;"
+```
+
+### 6. Push database schema
+
+```bash
+npm run db:push
+```
+
+### 7. Run the development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## RAG Architecture
 
-## Learn More
+```
+PDF Upload
+     │
+     ▼
+Text Extraction (pdf-parse)
+     │
+     ▼
+Chunking (500 words/chunk)
+     │
+     ▼
+Cohere Embeddings (embed-english-v3.0)
+     │
+     ▼
+Store in PostgreSQL + pgvector
+     │
+     ▼
+User sends question
+     │
+     ▼
+Embed question with Cohere
+     │
+     ▼
+Vector similarity search (<=> operator)
+     │
+     ▼
+Top 5 relevant chunks → Groq LLM
+     │
+     ▼
+Streamed response
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Pricing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Feature | Free | Pro |
+|---|---|---|
+| Document uploads | 5/day | Unlimited |
+| Conversations | 10 max | Unlimited |
+| RAG document chat | ✓ | ✓ |
+| AI Model | llama-3.1-8b | llama-3.3-70b |
+| Price | $0 | $9/month |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Testing
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+# Unit tests
+npm run test
+
+# Unit tests watch mode
+npm run test:ui
+
+# E2E tests (requires dev server running)
+npm run test:e2e
+
+# E2E tests with UI
+npm run test:e2e:ui
+```
+
+---
+
+## Docker
+
+```bash
+# Start PostgreSQL for development
+docker compose up -d
+
+# Build production image
+docker build -t nexus .
+
+# Run production container
+docker run -p 3000:3000 --env-file .env.local nexus
+```
+
+---
+
+## Project Structure
+
+```
+app/
+├── (app)/          → authenticated app (chat, settings, upgrade)
+├── (marketing)/    → landing page
+├── (auth)/         → login, register
+└── api/            → chat, webhook, uploadthing routes
+
+components/
+├── chat/           → ChatInterface, ChatMessage, FileUpload
+├── dashboard/      → AppSidebar, ConversationItem, NavUser
+└── marketing/      → Navbar, ThemeToggle
+
+actions/            → Server Actions (conversation, document, stripe)
+db/                 → Drizzle schema and client
+lib/                → auth, stripe, rag, uploadthing
+__tests__/          → Vitest unit tests
+e2e/                → Playwright E2E tests
+```
+
+---
+
+## What I Learned
+
+- Next.js 15 App Router with Server Components and Server Actions
+- RAG pipeline from scratch — chunking, embeddings, vector similarity search
+- AI streaming with Vercel AI SDK v6
+- pgvector for semantic search in PostgreSQL
+- Docker for reproducible local development environments
+- Production-grade testing with Vitest and Playwright
+- CI/CD with GitHub Actions
+
+---
+
+## License
+
+MIT

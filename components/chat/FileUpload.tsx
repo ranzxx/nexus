@@ -1,49 +1,71 @@
 "use client";
 
-import { UploadButton } from "@uploadthing/react";
-import type { OurFileRouter } from "@/lib/uploadthing";
+import { useUploadThing } from "@/lib/uploadthing";
 import { processDocument } from "@/actions/document";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
+import { useRef } from "react";
 
 type Props = {
-  onUploadComplete: (documentId: string) => void;
+  onUploadComplete: (documentId: string, name: string) => void;
 };
 
 export default function FileUpload({ onUploadComplete }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { startUpload, isUploading } = useUploadThing("documentUploader", {
+    onClientUploadComplete: async (res) => {
+      const file = res[0];
+      try {
+        const doc = await processDocument({
+          name: file.name,
+          fileUrl: file.ufsUrl,
+          fileSize: file.size,
+        });
+        toast.success(`${file.name} uploaded!`);
+        onUploadComplete(doc.id, doc.name);
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to process document",
+        );
+      }
+    },
+    onUploadError: (error) => {
+      if (error.message.includes("InvalidFileType")) {
+        toast.error("Please upload a PDF file only.");
+      } else if (error.message.includes("FileSize")) {
+        toast.error("File size exceeds 16MB limit.");
+      } else {
+        toast.error("Upload failed. Please try again.");
+      }
+    },
+  });
+
   return (
     <div data-testid="pdf-upload">
-      <UploadButton<OurFileRouter, "documentUploader">
-        endpoint="documentUploader"
-        appearance={{
-          button:
-            "!w-8 !h-8 !min-w-8 !max-w-8 !p-0 rounded-md !bg-transparent !text-muted-foreground hover:!bg-muted hover:!text-foreground flex items-center justify-center transition-colors",
-          allowedContent: "hidden",
-        }}
-        content={{ button: <Plus className="w-5 h-5" /> }}
-        onClientUploadComplete={async (res) => {
-          const file = res[0];
-          const doc = await processDocument({
-            name: file.name,
-            fileUrl: file.ufsUrl,
-            fileSize: file.size,
-          });
-          toast.success(`${file.name} uploaded!`);
-          onUploadComplete(doc.id);
-        }}
-        onUploadError={(error) => {
-          switch (true) {
-            case error.message.includes("InvalidFileType"):
-              toast.error("Please upload a PDF file only.");
-              break;
-            case error.message.includes("FileSize"):
-              toast.error("File size exceeds 16MB limit.");
-              break;
-            default:
-              toast.error("Upload failed. Please try again.");
-          }
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) startUpload([file]);
+          e.target.value = "";
         }}
       />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={isUploading}
+        className="w-8 h-8 min-w-8 p-0 rounded-md bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50"
+      >
+        {isUploading ? (
+          <Loader2 className="w-5 h-5 animate-spin" />
+        ) : (
+          <Plus className="w-5 h-5" />
+        )}
+      </button>
     </div>
   );
 }
