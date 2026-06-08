@@ -17,13 +17,19 @@ export default function FileUpload({ onUploadComplete }: Props) {
     onClientUploadComplete: async (res) => {
       const file = res[0];
       try {
-        const doc = await processDocument({
+        const result = await processDocument({
           name: file.name,
           fileUrl: file.ufsUrl,
           fileSize: file.size,
         });
+
+        if ("error" in result) {
+          toast.error(result.error);
+          return;
+        }
+
         toast.success(`${file.name} uploaded!`);
-        onUploadComplete(doc.id, doc.name);
+        onUploadComplete(result.data.id, result.data.name);
       } catch (err) {
         toast.error(
           err instanceof Error ? err.message : "Failed to process document",

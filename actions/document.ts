@@ -13,7 +13,6 @@ import {
   generateDocumentEmbeddings,
 } from "@/lib/rag";
 
-
 export async function processDocument({
   name,
   fileUrl,
@@ -22,14 +21,13 @@ export async function processDocument({
   name: string;
   fileUrl: string;
   fileSize: number;
-}) {
+}): Promise<{ error: string } | { data: typeof document.$inferSelect }> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
 
   const isPro = session.user.plan === "pro";
 
   if (!isPro) {
-    // cek upload hari ini
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
@@ -44,9 +42,10 @@ export async function processDocument({
       );
 
     if (value >= 5) {
-      throw new Error(
-        "Free plan limit: 5 documents per day. Upgrade to Pro for unlimited uploads.",
-      );
+      return {
+        error:
+          "Free plan limit: 5 documents per day. Upgrade to Pro for unlimited uploads.",
+      };
     }
   }
 
@@ -77,7 +76,7 @@ export async function processDocument({
   );
 
   revalidatePath("/documents");
-  return doc;
+  return { data: doc };
 }
 
 export async function getDocuments() {
