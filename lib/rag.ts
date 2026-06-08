@@ -7,10 +7,14 @@ const cohere = new CohereClient({
 });
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: buffer });
-  const result = await parser.getText();
-  return result.text;
+  const { getDocumentProxy, extractText } = await import("unpdf");
+  
+  const pdf = await getDocumentProxy(new Uint8Array(buffer));
+  const { text } = await extractText(pdf, {
+    mergePages: true,
+  });
+
+  return text;
 }
 
 // 2. Split teks jadi chunks
