@@ -10,13 +10,9 @@ An AI-powered chatbot platform that lets you upload PDF documents and chat with 
 
 ## Screenshots
 
-### Chat Interface
-
-![Chat Interface](./public/screenshots/chat.png)
-
-### Pricing
-
-![Pricing Page](./public/screenshots/pricing.png)
+| Chat Interface | Pricing Page |
+|---|---|
+| ![Chat Interface](./public/screenshots/chat.avif) | ![Pricing Page](./public/screenshots/pricing.avif) |
 
 ---
 
