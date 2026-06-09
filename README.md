@@ -2,13 +2,49 @@
 
 An AI-powered chatbot platform that lets you upload PDF documents and chat with your data using Retrieval-Augmented Generation (RAG) — built as a production-grade SaaS with authentication, subscriptions, and testing.
 
-🔗 **Live Demo**: [nexus.vercel.app](#)
+![CI](https://github.com/ranzxx/nexus/actions/workflows/ci.yml/badge.svg)
+
+🔗 **Live Demo**: [chatwithnexus.vercel.app](https://chatwithnexus.vercel.app)
 
 ---
 
 ## Screenshots
 
-![Chat Interface](./public/screenshots/rag.png)
+### Chat Interface
+
+![Chat Interface](./public/screenshots/chat.png)
+
+### Pricing
+
+![Pricing Page](./public/screenshots/pricing.png)
+
+---
+
+## Architecture
+
+```
+User
+ ↓
+Next.js App
+ ↓
+Groq LLM
+ ↓
+RAG Pipeline
+ ↓
+Cohere Embeddings
+ ↓
+PostgreSQL + pgvector
+```
+
+---
+
+## Highlights
+
+- Built a complete RAG pipeline from scratch
+- Implemented semantic search using pgvector
+- Integrated subscription billing with Stripe
+- Added CI/CD and automated testing with Playwright + Vitest
+- Deployed production-ready SaaS on Vercel
 
 ---
 
@@ -134,7 +170,7 @@ Open [http://localhost:3000](http://localhost:3000)
 PDF Upload
      │
      ▼
-Text Extraction (pdf-parse)
+Text Extraction (unpdf)
      │
      ▼
 Chunking (500 words/chunk)
@@ -171,7 +207,17 @@ Streamed response
 | Conversations | 10 max | Unlimited |
 | RAG document chat | ✓ | ✓ |
 | AI Model | llama-3.1-8b | llama-3.3-70b |
-| Price | $0 | $9/month |
+| Price | $0 | $12/month |
+
+---
+
+## Challenges Solved
+
+- Implemented vector similarity search with pgvector
+- Built document ingestion and chunking pipeline
+- Solved PDF extraction issues in serverless environments
+- Managed conversation persistence and streaming responses
+- Integrated authentication and subscription management
 
 ---
 
@@ -228,18 +274,6 @@ lib/                → auth, stripe, rag, uploadthing
 __tests__/          → Vitest unit tests
 e2e/                → Playwright E2E tests
 ```
-
----
-
-## What I Learned
-
-- Next.js 15 App Router with Server Components and Server Actions
-- RAG pipeline from scratch — chunking, embeddings, vector similarity search
-- AI streaming with Vercel AI SDK v6
-- pgvector for semantic search in PostgreSQL
-- Docker for reproducible local development environments
-- Production-grade testing with Vitest and Playwright
-- CI/CD with GitHub Actions
 
 ---
 
