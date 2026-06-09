@@ -203,7 +203,7 @@ Streamed response
 | Conversations | 10 max | Unlimited |
 | RAG document chat | ✓ | ✓ |
 | AI Model | llama-3.1-8b | llama-3.3-70b |
-| Price | $0 | $12/month |
+| Price | $0 | $9/month |
 
 ---
 
