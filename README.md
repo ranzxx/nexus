@@ -4,6 +4,14 @@ An AI-powered chatbot platform that lets you upload PDF documents and chat with 
 
 ![CI](https://github.com/ranzxx/nexus/actions/workflows/ci.yml/badge.svg)
 
+[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-pgvector-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Groq](https://img.shields.io/badge/Groq-LLM-F55036?style=flat-square)](https://groq.com)
+[![Stripe](https://img.shields.io/badge/Stripe-Subscriptions-635BFF?style=flat-square&logo=stripe&logoColor=white)](https://stripe.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com)
+[![Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
+
 🔗 **Live Demo**: [chatwithnexus.vercel.app](https://chatwithnexus.vercel.app)
 
 ---
@@ -23,13 +31,15 @@ User
  ↓
 Next.js App
  ↓
-Groq LLM
- ↓
-RAG Pipeline
- ↓
 Cohere Embeddings
  ↓
 PostgreSQL + pgvector
+ ↓
+Relevant Context
+ ↓
+Groq LLM
+ ↓
+Response
 ```
 
 ---
