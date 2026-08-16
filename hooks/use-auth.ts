@@ -15,8 +15,8 @@ export function useAuth() {
           toast.error(ctx.error.message);
         },
         onSuccess: () => {
-          toast.success("welcome to nexus");
-          router.push("/chat");
+          toast.success("Account created successfully");
+          router.push("/login");
         },
       },
     });
