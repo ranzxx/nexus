@@ -34,8 +34,6 @@ test.describe("Authentication", () => {
 
     await registerTestUser(page, email);
 
-    // User sekarang sudah login karena register berhasil.
-    // Kita hapus session browser supaya bisa test login dari kondisi guest.
     await page.context().clearCookies();
 
     await page.evaluate(() => {

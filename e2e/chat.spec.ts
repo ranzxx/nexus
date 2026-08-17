@@ -1,10 +1,11 @@
 import { test, expect } from "@playwright/test";
-import { registerTestUser } from "./helpers/auth";
+import { registerTestUser, login } from "./helpers/auth";
 
 test.describe("Chat", () => {
   test("authenticated user can open chat page", async ({ page }) => {
     const email = `e2e-chat-${Date.now()}@test.com`;
     await registerTestUser(page, email);
+    await login(page, email);
     await page.goto("/chat");
 
     await expect(page).toHaveURL(/chat/, { timeout: 15_000 });
@@ -13,6 +14,7 @@ test.describe("Chat", () => {
   test("user can send a message and get response", async ({ page }) => {
     const email = `e2e-message-${Date.now()}@test.com`;
     await registerTestUser(page, email);
+    await login(page, email);
     await page.goto("/chat");
 
     await page.getByTestId("chat-input").fill("hello nexus");
@@ -27,6 +29,7 @@ test.describe("Chat", () => {
   test("new message creates a conversation in sidebar", async ({ page }) => {
     const email = `e2e-conversation-${Date.now()}@test.com`;
     await registerTestUser(page, email);
+    await login(page, email);
     await page.goto("/chat");
 
     await page.getByTestId("chat-input").fill("what is 2+2?");
@@ -49,6 +52,7 @@ test.describe("Chat", () => {
   }) => {
     const email = `e2e-history-${Date.now()}@test.com`;
     await registerTestUser(page, email);
+    await login(page, email);
     await page.goto("/chat");
 
     await page.getByTestId("chat-input").fill("remember this: nexus e2e test");
