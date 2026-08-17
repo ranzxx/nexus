@@ -6,49 +6,61 @@ export function useAuth() {
   const router = useRouter();
 
   const signUp = async (name: string, email: string, password: string) => {
-    await authClient.signUp.email({
-      name,
-      email,
-      password,
-      fetchOptions: {
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
+    return new Promise<void>((resolve, reject) => {
+      authClient.signUp.email({
+        name,
+        email,
+        password,
+        fetchOptions: {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+            reject(new Error(ctx.error.message));
+          },
+          onSuccess: async () => {
+            toast.success("Account created successfully");
+            await router.push("/login");
+            resolve();
+          },
         },
-        onSuccess: () => {
-          toast.success("Account created successfully");
-          router.push("/login");
-        },
-      },
+      });
     });
   };
 
   const signIn = async (email: string, password: string) => {
-    await authClient.signIn.email({
-      email,
-      password,
-      fetchOptions: {
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
+    return new Promise<void>((resolve, reject) => {
+      authClient.signIn.email({
+        email,
+        password,
+        fetchOptions: {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+            reject(new Error(ctx.error.message));
+          },
+          onSuccess: async () => {
+            toast.success("welcome back");
+            await router.push("/chat");
+            resolve();
+          },
         },
-        onSuccess: () => {
-          toast.success("welcome back");
-          router.push("/chat");
-        },
-      },
+      });
     });
   };
 
   const signOut = async () => {
-    await authClient.signOut({
-      fetchOptions: {
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
+    return new Promise<void>((resolve, reject) => {
+      authClient.signOut({
+        fetchOptions: {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+            reject(new Error(ctx.error.message));
+          },
+          onSuccess: async () => {
+            toast.success("signed out");
+            await router.push("/login");
+            resolve();
+          },
         },
-        onSuccess: () => {
-          toast.success("signed out");
-          router.push("/login"); // redirect to login page
-        },
-      },
+      });
     });
   };
 
