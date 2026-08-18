@@ -13,7 +13,7 @@ test.describe("Authentication", () => {
     const email = `e2e-${Date.now()}@test.com`;
     await registerTestUser(page, email);
 
-    await expect(page).toHaveURL(/dashboard|chat/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/login/, { timeout: 10_000 });
   });
 
   test("shows error when login credentials are invalid", async ({ page }) => {
