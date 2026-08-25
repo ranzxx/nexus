@@ -1,47 +1,41 @@
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
+import logger from "./logger";
 
 const f = createUploadthing();
 
-const auth = () => ({ id: "fakeId" });
+const getAuth = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  return session?.user ?? null;
+};
 
 export const ourFileRouter = {
   documentUploader: f({ pdf: { maxFileSize: "16MB", maxFileCount: 1 } })
     .middleware(async () => {
-      return {};
+      const user = await getAuth();
+      if (!user) throw new UploadThingError("Unauthorized");
+      return { userId: user.id };
     })
     .onUploadComplete(async ({ file }) => {
       return { url: file.ufsUrl, name: file.name, size: file.size };
     }),
   imageUploader: f({
-    image: {
-      maxFileSize: "2MB",
-      maxFileCount: 1,
-    },
+    image: { maxFileSize: "2MB", maxFileCount: 1 },
   })
     .middleware(async () => {
-      const user = await auth();
-
+      const user = await getAuth();
       if (!user) throw new UploadThingError("Unauthorized");
-
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Upload complete for userId:", metadata.userId);
-
-      console.log("file url", file.ufsUrl);
-
+      logger.info({ userId: metadata.userId }, "Upload complete");
+      logger.info({ fileUrl: file.ufsUrl }, "File uploaded");
       return { uploadedBy: metadata.userId };
     }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
-import {
-  generateUploadButton,
-  generateUploadDropzone,
-  generateReactHelpers,
-} from "@uploadthing/react";
-
-export const UploadButton = generateUploadButton<OurFileRouter>();
-export const UploadDropzone = generateUploadDropzone<OurFileRouter>();
-export const { useUploadThing } = generateReactHelpers<OurFileRouter>();

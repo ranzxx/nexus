@@ -121,7 +121,6 @@ export default function ChatInterface({
         currentConversationId = conv.id;
         setConversationId(conv.id);
       } catch (err) {
-        console.error("Failed to create conversation:", err);
         return;
       }
     }

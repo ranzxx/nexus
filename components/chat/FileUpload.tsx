@@ -1,7 +1,8 @@
 "use client";
 
-import { useUploadThing } from "@/lib/uploadthing";
-import { processDocument } from "@/actions/document";
+import { useUploadThing } from "@/lib/uploadthing-client";
+import { useTRPC } from "@/trpc/client";
+import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Plus, Loader2 } from "lucide-react";
 import { useRef } from "react";
@@ -12,24 +13,20 @@ type Props = {
 
 export default function FileUpload({ onUploadComplete }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const trpc = useTRPC();
+  const uploadDocument = useMutation(trpc.document.upload.mutationOptions());
 
   const { startUpload, isUploading } = useUploadThing("documentUploader", {
     onClientUploadComplete: async (res) => {
       const file = res[0];
       try {
-        const result = await processDocument({
+        const result = await uploadDocument.mutateAsync({
           name: file.name,
           fileUrl: file.ufsUrl,
           fileSize: file.size,
         });
-
-        if ("error" in result) {
-          toast.error(result.error);
-          return;
-        }
-
         toast.success(`${file.name} uploaded!`);
-        onUploadComplete(result.data.id, result.data.name);
+        onUploadComplete(result.id, result.name);
       } catch (err) {
         toast.error(
           err instanceof Error ? err.message : "Failed to process document",
@@ -63,10 +60,10 @@ export default function FileUpload({ onUploadComplete }: Props) {
       <button
         type="button"
         onClick={() => inputRef.current?.click()}
-        disabled={isUploading}
+        disabled={isUploading || uploadDocument.isPending}
         className="w-8 h-8 min-w-8 p-0 rounded-md bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50"
       >
-        {isUploading ? (
+        {isUploading || uploadDocument.isPending ? (
           <Loader2 className="w-5 h-5 animate-spin" />
         ) : (
           <Plus className="w-5 h-5" />
