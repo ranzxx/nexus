@@ -17,8 +17,8 @@ export function useAuth() {
             reject(new Error(ctx.error.message));
           },
           onSuccess: async () => {
-            toast.success("Account created successfully");
             await router.push("/login");
+            toast.success("Account created successfully");
             resolve();
           },
         },
@@ -37,8 +37,8 @@ export function useAuth() {
             reject(new Error(ctx.error.message));
           },
           onSuccess: async () => {
-            toast.success("welcome back");
             await router.push("/chat");
+            toast.success("welcome back");
             resolve();
           },
         },
@@ -55,8 +55,8 @@ export function useAuth() {
             reject(new Error(ctx.error.message));
           },
           onSuccess: async () => {
-            toast.success("signed out");
             await router.push("/login");
+            toast.success("signed out");
             resolve();
           },
         },

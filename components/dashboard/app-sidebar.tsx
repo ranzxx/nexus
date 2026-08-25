@@ -20,6 +20,7 @@ import { useEffect, useState } from "react";
 import { getConversations } from "@/actions/conversation";
 import { PlusCircleIcon } from "lucide-react";
 import ConversationItem from "./conversation-item";
+import { Skeleton } from "../ui/skeleton";
 
 type Conversation = {
   id: string;
@@ -30,13 +31,18 @@ type Conversation = {
 export default function AppSidebar() {
   const pathname = usePathname();
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [isLoadingConversations, setIsLoadingConversations] =
+    useState<boolean>(true);
 
   useEffect(() => {
-    getConversations().then(setConversations);
+    getConversations().then((data) => {
+      setConversations(data);
+      setIsLoadingConversations(false);
+    });
 
     const interval = setInterval(() => {
       getConversations().then(setConversations);
-    }, 3000); // refresh setiap 3 detik
+    }, 3000);
 
     return () => clearInterval(interval);
   }, []);
@@ -69,36 +75,48 @@ export default function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        {conversations.length > 0 && (
-          <SidebarGroup className="mt-5">
-            <SidebarGroupLabel className="text-muted-foreground/70 dark:text-[#a1a1aa]/70 text-xs font-semibold tracking-wider uppercase px-2 mb-2">
-              Recent Chats
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {conversations.slice(0, 10).map((conv) => (
-                  <ConversationItem
-                    key={conv.id}
-                    id={conv.id}
-                    title={conv.title}
-                    isActive={pathname === `/chat/${conv.id}`}
-                    onDelete={(id) =>
-                      setConversations((prev) =>
-                        prev.filter((c) => c.id !== id),
-                      )
-                    }
-                    onRename={(id, title) =>
-                      setConversations((prev) =>
-                        prev.map((c) => (c.id === id ? { ...c, title } : c)),
-                      )
-                    }
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+
+        <SidebarGroup className="mt-5">
+          <SidebarGroupLabel className="text-muted-foreground/70 dark:text-[#a1a1aa]/70 text-xs font-semibold tracking-wider uppercase px-2 mb-2">
+            Recent Chats
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {isLoadingConversations
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <SidebarMenuItem key={i} className="px-3 py-1.5">
+                      <Skeleton className="h-6 w-full rounded" />
+                    </SidebarMenuItem>
+                  ))
+                : conversations.length > 0
+                  ? conversations
+                      .slice(0, 10)
+                      .map((conv) => (
+                        <ConversationItem
+                          key={conv.id}
+                          id={conv.id}
+                          title={conv.title}
+                          isActive={pathname === `/chat/${conv.id}`}
+                          onDelete={(id) =>
+                            setConversations((prev) =>
+                              prev.filter((c) => c.id !== id),
+                            )
+                          }
+                          onRename={(id, title) =>
+                            setConversations((prev) =>
+                              prev.map((c) =>
+                                c.id === id ? { ...c, title } : c,
+                              ),
+                            )
+                          }
+                        />
+                      ))
+                  : null}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
+      
       <SidebarFooter className="p-4 border-t border-border dark:border-[#27272a] flex flex-row items-center justify-between">
         <NavUser />
         <ThemeToggle size={"icon-lg"} />

@@ -68,6 +68,7 @@ export const account = pgTable(
     refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
+    issuer: text("issuer"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .$onUpdate(() => /* @__PURE__ */ new Date())
@@ -104,6 +105,7 @@ export const document = pgTable(
     fileUrl: text("file_url").notNull(), // URL di R2
     fileSize: integer("file_size").notNull(), // bytes
     fileType: text("file_type").notNull(), // "pdf" | "txt" | "docx"
+    status: text('status').default('processing').notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

@@ -20,11 +20,28 @@ import { authClient } from "@/lib/auth-client";
 import { useAuth } from "@/hooks/use-auth";
 import Link from "next/link";
 import { Astroid, LogOutIcon, MoreVerticalIcon, User2Icon } from "lucide-react";
+import { Skeleton } from "../ui/skeleton";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const { signOut } = useAuth();
-  const { data: session } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
+
+  if(isPending) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <Skeleton className="h-8 w-8 rounded-lg"/>
+            <div className="flex-1 space-y-1.5">
+              <Skeleton className="h-3 w-24"/>
+              <Skeleton className="h-3 w-32"/>
+            </div>
+          </div>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
 
   return (
     <SidebarMenu>
