@@ -44,7 +44,6 @@ export async function createConversation(documentId?: string) {
     .insert(conversation)
     .values({
       userId: session.user.id,
-      documentId: documentId ?? null,
       title: "New Chat",
     })
     .returning();

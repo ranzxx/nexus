@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { and, count, eq, gte } from "drizzle-orm";
 import { router, protectedProcedure, rateLimitedProcedure } from "../init";
-import { document } from "@/db/schema";
+import { conversation, conversationDocument, document } from "@/db/schema";
 import { inngest } from "@/inngest/client";
 
 export const documentRouter = router({
@@ -19,15 +19,33 @@ export const documentRouter = router({
         name: z.string().min(1),
         fileUrl: z.string().url(),
         fileSize: z.number(),
+        conversationId: z.string(), 
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const MAX_FILE_SIZE = 10 * 1024 * 1024; 
+      const MAX_FILE_SIZE = 10 * 1024 * 1024;
       if (input.fileSize > MAX_FILE_SIZE) {
         throw new TRPCError({
           code: "PAYLOAD_TOO_LARGE",
           message:
             "File too large. Max 10MB. Please compress or split your PDF.",
+        });
+      }
+
+      const [conv] = await ctx.db
+        .select({ id: conversation.id })
+        .from(conversation)
+        .where(
+          and(
+            eq(conversation.id, input.conversationId),
+            eq(conversation.userId, ctx.user.id),
+          ),
+        );
+
+      if (!conv) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Invalid conversation",
         });
       }
 
@@ -64,10 +82,15 @@ export const documentRouter = router({
           fileSize: input.fileSize,
           fileType: "pdf",
           userId: ctx.user.id,
-          status: "processing", 
+          status: "processing",
         })
         .returning();
-        
+
+      await ctx.db.insert(conversationDocument).values({
+        conversationId: input.conversationId,
+        documentId: doc.id,
+      });
+
       await inngest.send({
         name: "document/uploaded",
         data: {

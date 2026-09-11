@@ -1,8 +1,20 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index, integer, pgEnum } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  boolean,
+  index,
+  integer,
+  pgEnum,
+} from "drizzle-orm/pg-core";
 import { customType } from "drizzle-orm/pg-core";
 
-const vector = customType<{ data: number[]; driverData: string; config: { length: number } }>({
+const vector = customType<{
+  data: number[];
+  driverData: string;
+  config: { length: number };
+}>({
   dataType(config) {
     return `vector(${config?.length ?? 1024})`;
   },
@@ -101,11 +113,11 @@ export const document = pgTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    name: text("name").notNull(), // nama file asli
-    fileUrl: text("file_url").notNull(), // URL di R2
-    fileSize: integer("file_size").notNull(), // bytes
-    fileType: text("file_type").notNull(), // "pdf" | "txt" | "docx"
-    status: text('status').default('processing').notNull(),
+    name: text("name").notNull(),
+    fileUrl: text("file_url").notNull(),
+    fileSize: integer("file_size").notNull(),
+    fileType: text("file_type").notNull(),
+    status: text("status").default("processing").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -120,12 +132,12 @@ export const chunk = pgTable(
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    content: text("content").notNull(), // potongan teks dari dokumen
-    embedding: vector("embedding", { length: 1024 }).notNull(), // OpenAI ada-002 embedding
+    content: text("content").notNull(),
+    embedding: vector("embedding", { length: 1024 }).notNull(),
     documentId: text("document_id")
       .notNull()
       .references(() => document.id, { onDelete: "cascade" }),
-    chunkIndex: integer("chunk_index").notNull(), // urutan chunk dalam dokumen
+    chunkIndex: integer("chunk_index").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("chunk_documentId_idx").on(table.documentId)],
@@ -141,9 +153,6 @@ export const conversation = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
-    documentId: text("document_id").references(() => document.id, {
-      onDelete: "set null",
-    }), // optional, bisa chat tanpa dokumen
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -153,13 +162,33 @@ export const conversation = pgTable(
   (table) => [index("conversation_userId_idx").on(table.userId)],
 );
 
+export const conversationDocument = pgTable(
+  "conversation_document",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    conversationId: text("conversation_id")
+      .notNull()
+      .references(() => conversation.id, { onDelete: "cascade" }),
+    documentId: text("document_id")
+      .notNull()
+      .references(() => document.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("conversation_document_conversationId_idx").on(table.conversationId),
+    index("conversation_document_documentId_idx").on(table.documentId),
+  ],
+);
+
 export const message = pgTable(
   "message",
   {
     id: text("id")
       .primaryKey()
       .$defaultFn(() => crypto.randomUUID()),
-    role: messageRoleEnum('role').notNull(),
+    role: messageRoleEnum("role").notNull(),
     content: text("content").notNull(),
     conversationId: text("conversation_id")
       .notNull()
@@ -195,7 +224,7 @@ export const accountRelations = relations(account, ({ one }) => ({
 export const documentRelations = relations(document, ({ one, many }) => ({
   user: one(user, { fields: [document.userId], references: [user.id] }),
   chunks: many(chunk),
-  conversations: many(conversation),
+  conversationDocuments: many(conversationDocument),
 }));
 
 export const chunkRelations = relations(chunk, ({ one }) => ({
@@ -209,11 +238,22 @@ export const conversationRelations = relations(
   conversation,
   ({ one, many }) => ({
     user: one(user, { fields: [conversation.userId], references: [user.id] }),
+    conversationDocuments: many(conversationDocument),
+    messages: many(message),
+  }),
+);
+
+export const conversationDocumentRelations = relations(
+  conversationDocument,
+  ({ one }) => ({
+    conversation: one(conversation, {
+      fields: [conversationDocument.conversationId],
+      references: [conversation.id],
+    }),
     document: one(document, {
-      fields: [conversation.documentId],
+      fields: [conversationDocument.documentId],
       references: [document.id],
     }),
-    messages: many(message),
   }),
 );
 
@@ -231,6 +271,7 @@ export const schema = {
   verification,
   document,
   chunk,
+  conversationDocument,
   conversation,
   message,
 };

@@ -8,7 +8,7 @@ const cohere = new CohereClient({
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   const { getDocumentProxy, extractText } = await import("unpdf");
-  
+
   const pdf = await getDocumentProxy(new Uint8Array(buffer));
   const { text } = await extractText(pdf, {
     mergePages: true,
@@ -17,7 +17,6 @@ export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   return text;
 }
 
-// 2. Split teks jadi chunks
 export function splitIntoChunks(text: string, chunkSize = 500): string[] {
   const words = text.split(" ");
   const chunks: string[] = [];
@@ -74,21 +73,21 @@ export async function generateQueryEmbedding(text: string): Promise<number[]> {
   return embeddings.float[0];
 }
 
-// 5. Search chunks yang relevan berdasarkan query
 export async function searchRelevantChunks(
   queryEmbedding: number[],
-  documentId: string,
-  limit = 5
+  conversationId: string,
+  limit = 5,
 ): Promise<string[]> {
-  const embedding = JSON.stringify(queryEmbedding)
+  const embedding = JSON.stringify(queryEmbedding);
 
   const results = await db.execute(sql`
-    SELECT content
-    FROM chunk
-    WHERE document_id = ${documentId}
-    ORDER BY embedding <=> ${embedding}::vector
+    SELECT c.content
+    FROM chunk c
+    INNER JOIN conversation_document cd ON cd.document_id = c.document_id
+    WHERE cd.conversation_id = ${conversationId}
+    ORDER BY c.embedding <=> ${embedding}::vector
     LIMIT ${limit}
-  `)
+  `);
 
   return results.map((row) => row.content as string);
 }
