@@ -213,7 +213,7 @@ Open [http://localhost:3000](http://localhost:3000). Inngest's local dashboard i
 PDF Upload
 │
 ▼
-tRPC mutation → insert document record → trigger Inngest event
+tRPC mutation → insert document record → link to conversation (conversation_document) → trigger Inngest event
 │
 ▼
 Inngest background job:
@@ -230,7 +230,7 @@ User sends question
 Embed question with Cohere
 │
 ▼
-Vector similarity search (<=> operator, HNSW indexed)
+Vector similarity search across all documents in the conversation (HNSW indexed)
 │
 ▼
 Top 5 relevant chunks → OpenRouter LLM (with fallback models)
@@ -263,6 +263,7 @@ Streamed response
 - Managed conversation persistence and streaming responses
 - Integrated authentication and subscription management
 - Added production observability (Sentry error tracking + Pino structured logging)
+- Designed a many-to-many document-to-conversation relationship (junction table) to support referencing multiple documents within a single conversation
 
 ---
 

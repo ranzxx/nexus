@@ -7,7 +7,7 @@ import { createConversation } from "@/actions/conversation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bot, Send } from "lucide-react";
+import { Bot, Send, FileText } from "lucide-react";
 import FileUpload from "./FileUpload";
 import { ChatMessage } from "./ChatMessage";
 import { useRouter } from "next/navigation";
@@ -20,26 +20,29 @@ type DBMessage = {
   conversationId: string;
 };
 
+type UploadedDoc = {
+  id: string;
+  name: string;
+};
+
 type Props = {
   conversationId?: string;
   initialMessages?: DBMessage[];
-  initialDocumentId?: string;
+  initialDocuments?: UploadedDoc[];
 };
 
 export default function ChatInterface({
   conversationId: initialConversationId,
   initialMessages = [],
-  initialDocumentId,
+  initialDocuments = [],
 }: Props) {
   const router = useRouter();
   const [input, setInput] = useState("");
-  const [documentName, setDocumentName] = useState<string | null>(null);
   const [conversationId, setConversationId] = useState<string | null>(
     initialConversationId ?? null,
   );
-  const [documentId, setDocumentId] = useState<string | null>(
-    initialDocumentId ?? null,
-  );
+  const [uploadedDocs, setUploadedDocs] =
+    useState<UploadedDoc[]>(initialDocuments);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -55,7 +58,7 @@ export default function ChatInterface({
     sendMessage,
     status,
   } = useChat({
-    transport: stableTransport
+    transport: stableTransport,
   });
 
   const isLoading = status === "streaming" || status === "submitted";
@@ -106,23 +109,27 @@ export default function ChatInterface({
     router,
   ]);
 
+  async function ensureConversation(): Promise<string> {
+    if (conversationId) return conversationId;
+
+    const conv = await createConversation();
+    setConversationId(conv.id);
+    return conv.id;
+  }
+
   async function handleSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault();
     const text = input.trim();
     if (!text || isLoading) return;
 
-    let currentConversationId = conversationId;
     setInput("");
     if (textareaRef.current) textareaRef.current.style.height = "auto";
 
-    if (!currentConversationId) {
-      try {
-        const conv = await createConversation(documentId ?? undefined);
-        currentConversationId = conv.id;
-        setConversationId(conv.id);
-      } catch (err) {
-        return;
-      }
+    let currentConversationId: string;
+    try {
+      currentConversationId = await ensureConversation();
+    } catch (err) {
+      return err;
     }
 
     sendMessage(
@@ -130,7 +137,6 @@ export default function ChatInterface({
       {
         body: {
           conversationId: currentConversationId,
-          documentId: documentId ?? undefined,
         },
       },
     );
@@ -138,20 +144,17 @@ export default function ChatInterface({
 
   return (
     <div className="flex flex-col h-full bg-background dark:bg-[#09090b] relative overflow-hidden">
-      {documentId && (
-        <div className="px-6 py-2 border-b border-border dark:border-[#27272a] bg-muted/50 dark:bg-[#18181b]/50 shrink-0 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground dark:text-[#a1a1aa] font-medium tracking-wide">
-            {documentName ?? "document"}
-          </p>
-          <button
-            onClick={() => {
-              setDocumentId(null);
-              setDocumentName(null);
-            }}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            ✕ remove
-          </button>
+      {uploadedDocs.length > 0 && (
+        <div className="px-6 py-2 border-b border-border dark:border-[#27272a] bg-muted/50 dark:bg-[#18181b]/50 shrink-0 flex items-center gap-2 flex-wrap">
+          {uploadedDocs.map((doc) => (
+            <span
+              key={doc.id}
+              className="text-xs text-muted-foreground dark:text-[#a1a1aa] font-medium tracking-wide flex items-center gap-1 bg-background dark:bg-[#27272a] px-2 py-1 rounded-md"
+            >
+              <FileText className="w-3 h-3" />
+              {doc.name}
+            </span>
+          ))}
         </div>
       )}
 
@@ -163,8 +166,8 @@ export default function ChatInterface({
                 <Bot className="w-6 h-6 text-foreground dark:text-white" />
               </div>
               <p className="text-muted-foreground dark:text-[#a1a1aa] text-sm">
-                {documentId
-                  ? "Ask anything about your document"
+                {uploadedDocs.length > 0
+                  ? "Ask anything about your documents"
                   : "How can I help you today?"}
               </p>
             </div>
@@ -196,11 +199,11 @@ export default function ChatInterface({
             onSubmit={handleSubmit}
             className="flex items-center gap-2 rounded-2xl border border-border bg-transparent px-3 py-3"
           >
-            <div className={`shrink-0 mb-0.5 ${documentId ? "hidden" : ""}`}>
+            <div className="shrink-0 mb-0.5">
               <FileUpload
+                getConversationId={ensureConversation}
                 onUploadComplete={(id, name) => {
-                  setDocumentId(id);
-                  setDocumentName(name);
+                  setUploadedDocs((prev) => [...prev, { id, name }]);
                 }}
               />
             </div>
@@ -221,7 +224,9 @@ export default function ChatInterface({
                 }
               }}
               placeholder={
-                documentId ? "Ask about your document..." : "Message Nexus..."
+                uploadedDocs.length > 0
+                  ? "Ask about your documents..."
+                  : "Message Nexus..."
               }
               disabled={isLoading}
               className="flex-1 min-h-11 max-h-11 bg-transparent! border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none shadow-none text-foreground text-[15px] py-3 px-1 placeholder:text-muted-foreground overflow-y-auto custom-scrollbar"

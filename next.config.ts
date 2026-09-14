@@ -3,7 +3,14 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   // output: "standalone",
-  serverExternalPackages: ["unpdf"],
+  serverExternalPackages: [
+    "unpdf",
+    "pino",
+    "pino-pretty",
+    "thread-stream",
+    "pino-worker",
+    "pino-file",
+  ],
 };
 
 export default withSentryConfig(nextConfig, {

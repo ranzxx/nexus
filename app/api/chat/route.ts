@@ -25,12 +25,10 @@ function getMessageText(message: UIMessage) {
 
 async function getOrCreateConversation({
   conversationId,
-  documentId,
   userId,
   isPro,
 }: {
   conversationId?: string;
-  documentId?: string;
   userId: string;
   isPro: boolean;
 }) {
@@ -68,7 +66,6 @@ async function getOrCreateConversation({
     .insert(conversation)
     .values({
       userId,
-      documentId: documentId ?? null,
       title: "New Chat",
     })
     .returning({ id: conversation.id });
@@ -80,7 +77,6 @@ export async function POST(request: Request) {
   try {
     let body: {
       messages?: UIMessage[];
-      documentId?: string;
       conversationId?: string;
     };
 
@@ -90,7 +86,7 @@ export async function POST(request: Request) {
       return NextResponse.json("Invalid request body", { status: 400 });
     }
 
-    const { messages, documentId, conversationId } = body;
+    const { messages, conversationId } = body;
 
     if (!messages || !Array.isArray(messages)) {
       return NextResponse.json("Invalid messages", { status: 400 });
@@ -136,7 +132,6 @@ export async function POST(request: Request) {
 
     const currentConversationId = await getOrCreateConversation({
       conversationId,
-      documentId,
       userId: session.user.id,
       isPro,
     });
@@ -147,14 +142,13 @@ export async function POST(request: Request) {
         : ""
     }`;
 
-    if (documentId) {
-      const queryEmbedding = await generateQueryEmbedding(userText);
+    const queryEmbedding = await generateQueryEmbedding(userText);
+    const relevantChunks = await searchRelevantChunks(
+      queryEmbedding,
+      currentConversationId,
+    );
 
-      const relevantChunks = await searchRelevantChunks(
-        queryEmbedding,
-        documentId,
-      );
-
+    if (relevantChunks.length > 0) {
       systemPrompt = `You are a helpful assistant.${
         isPro
           ? " You are running on a premium model with enhanced capabilities."

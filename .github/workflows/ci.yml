@@ -27,9 +27,16 @@ jobs:
 
     env:
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/nexus_test
-      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
       BETTER_AUTH_SECRET: ${{ secrets.BETTER_AUTH_SECRET }}
       BETTER_AUTH_URL: http://localhost:3000
+      UPSTASH_REDIS_REST_URL: ${{ secrets.UPSTASH_REDIS_REST_URL }}
+      UPSTASH_REDIS_REST_TOKEN: ${{ secrets.UPSTASH_REDIS_REST_TOKEN }}
+      INNGEST_EVENT_KEY: ${{ secrets.INNGEST_EVENT_KEY }}
+      INNGEST_SIGNING_KEY: ${{ secrets.INNGEST_SIGNING_KEY }}
+      UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
+      INNGEST_DEV: "1"
 
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +53,15 @@ jobs:
       - name: Enable pgvector
         run: |
           PGPASSWORD=postgres psql -h localhost -U postgres -d nexus_test -c "CREATE EXTENSION IF NOT EXISTS vector;"
-      
+
       - run: npm run db:push
+
+      - name: Create HNSW index
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d nexus_test -c "CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw_idx ON chunk USING hnsw (embedding vector_cosine_ops);"
+
+      - name: Start Inngest Dev Server
+        run: npx inngest-cli@latest dev --no-discovery -u http://localhost:3000/api/inngest &
 
       - run: npm run test:e2e
 
