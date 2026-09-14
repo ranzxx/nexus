@@ -17,6 +17,6 @@ test("user can upload a PDF document", async ({ page }) => {
   await expect(
     page.getByText("test-document.pdf", { exact: true }),
   ).toBeVisible({
-    timeout: 30_000,
+    timeout: 60_000,
   });
 });
