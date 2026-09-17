@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist } from "next/font/google";
 import "./globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { cn } from "@/lib/utils";
@@ -9,17 +9,11 @@ import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { TRPCReactProvider } from "@/trpc/client";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const geist = Geist({
+  variable: '--font-geist',
+  subsets: ['latin'],
+  weight: "400",
+})
 
 export const metadata: Metadata = {
   title: {
@@ -39,11 +33,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans scroll-smooth", inter.variable)}
+      className={cn("font-sans scroll-smooth", geist.className)}
     >
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <TRPCReactProvider>
           <ThemeProvider
