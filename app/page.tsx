@@ -7,8 +7,8 @@ import {
   Search,
   Zap,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
+import Navbar from "@/components/marketing/navbar";
 
 const features = [
   {
@@ -47,55 +47,27 @@ const steps = [
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#09090b] text-white">
-      <header className="border-b border-zinc-800">
-        <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="text-xl font-semibold">
-            Nexus
-          </Link>
-
-          <div className="hidden items-center gap-8 text-sm text-zinc-400 md:flex">
-            <a href="#features" className="hover:text-white">
-              Features
-            </a>
-            <a href="#how-it-works" className="hover:text-white">
-              How it works
-            </a>
-            <Link href="/upgrade" className="hover:text-white">
-              Pricing
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button asChild variant="ghost" className="hidden md:inline-flex">
-              <Link href="/login">Sign in</Link>
-            </Button>
-
-            <Button asChild>
-              <Link href="/register">Get started</Link>
-            </Button>
-          </div>
-        </nav>
-      </header>
+      <Navbar />
 
       <section className="mx-auto flex max-w-7xl flex-col items-center px-6 py-24 text-center">
         <div className="mb-6 rounded-full border border-zinc-800 bg-zinc-900 px-4 py-1.5 text-sm text-zinc-400">
           Built with RAG, PostgreSQL, pgvector, and AI SDK
         </div>
 
-        <h1 className="max-w-4xl text-4xl font-semibold tracking-tight md:text-6xl">
+        <h1 className="max-w-4xl text-4xl tracking-tight md:text-6xl">
           Turn PDFs into intelligent conversations
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-zinc-400">
+        <p className="mt-6 max-w-2xl text-xl text-gray-400">
           Nexus helps you upload documents, ask questions, and get context-aware
           answers powered by retrieval augmented generation.
         </p>
 
         <div className="mt-10 flex flex-col gap-3 sm:flex-row">
           <Button asChild size="lg">
-            <Link href="/chat">
+            <Link href="/chat" className="font-semibold">
               Start chatting
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Link>
           </Button>
 
