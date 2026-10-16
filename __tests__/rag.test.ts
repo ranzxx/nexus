@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { splitIntoChunks } from "@/lib/rag";
+import { splitIntoChunks } from "@/lib/chunk-text";
 
 describe("splitIntoChunks", () => {
   it("should split text into chunks of correct size", () => {

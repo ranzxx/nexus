@@ -11,23 +11,23 @@ type ThemeToggleProps = {
 };
 
 export default function ThemeToggle({ size }: ThemeToggleProps) {
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState<boolean>(false);
 
   useEffect(() => setMounted(true), []);
   if (!mounted) return null;
 
+  const isDark = resolvedTheme === "dark";
+
   return (
     <Button
       size={size}
-      variant={"outline"}
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      variant="outline"
+      className="rounded-none"
+      aria-label="Toggle theme"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
     >
-      {theme === "dark" ? (
-        <SunIcon />
-      ) : (
-        <MoonIcon />
-      )}
+      {isDark ? <SunIcon /> : <MoonIcon />}
     </Button>
   );
 }

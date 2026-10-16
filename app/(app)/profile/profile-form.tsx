@@ -22,7 +22,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 
-type ProfileForm = z.infer<typeof profileSchema>;
+type ProfileFormValues = z.infer<typeof profileSchema>;
 
 type Props = {
   user?: {
@@ -33,18 +33,35 @@ type Props = {
   } | null;
 };
 
+function Section({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className="border border-border bg-card dark:border-[#27272A] dark:bg-[#121212]">
+      <div className="border-b border-border px-6 py-3 font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground dark:border-[#27272A] dark:text-[#A1A1AA]">
+        {label}
+      </div>
+      <div className="p-6">{children}</div>
+    </section>
+  );
+}
+
 export default function ProfileForm({ user }: Props) {
   const router = useRouter();
   const [imageUrl, setImageUrl] = useState(user?.image ?? "");
 
-  const form = useForm<ProfileForm>({
+  const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: user?.name ?? "",
     },
   });
 
-  async function onSubmit(data: ProfileForm) {
+  async function onSubmit(data: ProfileFormValues) {
     await authClient.updateUser({
       name: data.name,
       image: imageUrl || undefined,
@@ -62,18 +79,17 @@ export default function ProfileForm({ user }: Props) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border bg-card p-6">
+      <Section label="Profile photo">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <Avatar className="h-20 w-20 border border-border">
-            <AvatarImage src={imageUrl} />
-            <AvatarFallback className="text-xl">
+          <Avatar className="h-20 w-20 rounded-none border border-border dark:border-[#27272A]">
+            <AvatarImage src={imageUrl} className="rounded-none" />
+            <AvatarFallback className="rounded-none text-xl">
               {user?.name?.[0]?.toUpperCase() ?? "U"}
             </AvatarFallback>
           </Avatar>
 
           <div className="space-y-2">
-            <h2 className="text-lg font-medium">Profile photo</h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground dark:text-[#A1A1AA]">
               Upload an image to personalize your Nexus account.
             </p>
 
@@ -81,7 +97,7 @@ export default function ProfileForm({ user }: Props) {
               endpoint="imageUploader"
               appearance={{
                 button:
-                  "!h-9 !w-auto !px-4 rounded-md !bg-foreground !text-background hover:!bg-foreground/90 text-sm",
+                  "!h-9 !w-auto !px-4 !rounded-none !bg-foreground !text-background hover:!bg-foreground/90 font-mono text-xs uppercase tracking-wider",
                 allowedContent: "hidden",
               }}
               content={{
@@ -94,7 +110,7 @@ export default function ProfileForm({ user }: Props) {
               }}
               onClientUploadComplete={(res) => {
                 setImageUrl(res[0].ufsUrl);
-                toast.success("Image uploaded");
+                toast.success("Photo uploaded. Click Save changes to apply.");
               }}
               onUploadError={() => {
                 toast.error("Image upload failed. Please try again.");
@@ -102,18 +118,13 @@ export default function ProfileForm({ user }: Props) {
             />
           </div>
         </div>
-      </section>
+      </Section>
 
-      <section className="rounded-2xl border border-border bg-card p-6">
-        <h2 className="text-lg font-medium">Account information</h2>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Update your basic profile details.
-        </p>
-
+      <Section label="Account">
         <form
           id="profile-form"
           onSubmit={form.handleSubmit(onSubmit)}
-          className="mt-6 space-y-4"
+          className="space-y-5"
         >
           <FieldGroup>
             <Controller
@@ -121,26 +132,45 @@ export default function ProfileForm({ user }: Props) {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel>Name</FieldLabel>
-                  <Input {...field} aria-invalid={fieldState.invalid} />
+                  <FieldLabel htmlFor="name">Name</FieldLabel>
+                  <Input
+                    {...field}
+                    id="name"
+                    className="rounded-none"
+                    aria-invalid={fieldState.invalid}
+                  />
                   {fieldState.error && (
                     <FieldError errors={[fieldState.error]} />
                   )}
                 </Field>
               )}
             />
+
+            <Field>
+              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <Input
+                id="email"
+                value={user?.email ?? ""}
+                disabled
+                className="rounded-none"
+              />
+              <p className="text-xs text-muted-foreground dark:text-[#A1A1AA]">
+                Email cannot be changed.
+              </p>
+            </Field>
           </FieldGroup>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Email</label>
-            <Input value={user?.email ?? ""} disabled />
+          <div className="flex justify-end border-t border-border pt-5 dark:border-[#27272A]">
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+              className="rounded-none font-mono text-xs uppercase tracking-wider"
+            >
+              {form.formState.isSubmitting ? "Saving..." : "Save changes"}
+            </Button>
           </div>
-
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Saving..." : "Save changes"}
-          </Button>
         </form>
-      </section>
+      </Section>
     </div>
   );
 }

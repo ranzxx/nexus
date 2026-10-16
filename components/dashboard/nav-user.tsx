@@ -4,7 +4,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -18,9 +17,9 @@ import {
 } from "@/components/ui/sidebar";
 import { authClient } from "@/lib/auth-client";
 import { useAuth } from "@/hooks/use-auth";
-import Link from "next/link";
 import { Astroid, LogOutIcon, MoreVerticalIcon, User2Icon } from "lucide-react";
 import { Skeleton } from "../ui/skeleton";
+import NavUserLinks from "./nav-user-links";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
@@ -50,9 +49,9 @@ export function NavUser() {
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent cursor-pointer data-[state=open]:text-sidebar-accent-foreground"
+              className="cursor-pointer rounded-none data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <Avatar className="h-8 w-8 rounded-lg grayscale">
+              <Avatar className="h-8 w-8 rounded-none grayscale">
                 <AvatarImage
                   src={session?.user.image || undefined}
                   alt={session?.user.name}
@@ -73,7 +72,7 @@ export function NavUser() {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-none"
             side={isMobile ? "bottom" : "right"}
             align="end"
             sideOffset={4}
@@ -100,25 +99,15 @@ export function NavUser() {
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <Link href={"/profile"}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <User2Icon />
-                  Account
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuGroup>
-            <DropdownMenuGroup>
-              <Link href={"/upgrade"}>
-                <DropdownMenuItem className="cursor-pointer">
-                  <Astroid />
-                  Upgrade plan
-                </DropdownMenuItem>
-              </Link>
-            </DropdownMenuGroup>
+            <NavUserLinks href={"/profile"} icon={User2Icon} label="Account" />
+            <NavUserLinks
+              href={"/upgrade"}
+              icon={Astroid}
+              label="Upgrade plan"
+            />
             <DropdownMenuSeparator />
             <DropdownMenuItem
-              onClick={() => signOut()}
+              onClick={() => signOut().catch(() => {})}
               className="cursor-pointer"
             >
               <LogOutIcon />

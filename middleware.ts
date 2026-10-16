@@ -1,27 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
 const authRoutes = ["/login", "/register"];
 const protectedRoutes = ["/profile", "/chat"];
 
+const matches = (pathname: string, routes: string[]) =>
+  routes.some((r) => pathname === r || pathname.startsWith(`${r}/`));
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isLoggedIn = !!getSessionCookie(request);
 
-  const sessionCookie =
-    request.cookies.get("better-auth.session_token") ||
-    request.cookies.get("__Secure-better-auth.session_token");
-
-  const isLoggedIn = !!sessionCookie;
-
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
-  const isProtectedRoute = protectedRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
-
-  if (!isLoggedIn && isProtectedRoute) {
+  if (!isLoggedIn && matches(pathname, protectedRoutes)) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isLoggedIn && isAuthRoute) {
+  if (isLoggedIn && matches(pathname, authRoutes)) {
     return NextResponse.redirect(new URL("/chat", request.url));
   }
 
@@ -29,11 +23,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    '/profile',
-    "/chat/:path*",
-    "/upgrade",
-    "/login",
-    "/register",
-  ],
+  matcher: ["/profile/:path*", "/chat/:path*", "/login", "/register"],
 };

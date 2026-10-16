@@ -2,9 +2,13 @@ import { db } from "@/db/drizzle";
 import { CohereClient } from "cohere-ai";
 import { sql } from "drizzle-orm";
 
+const EMBED_BATCH_SIZE = 96;
+
 const cohere = new CohereClient({
   token: process.env.COHERE_API_KEY!,
 });
+
+export { splitIntoChunks } from "./chunk-text";
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   const { getDocumentProxy, extractText } = await import("unpdf");
@@ -17,60 +21,39 @@ export async function extractTextFromPDF(buffer: Buffer): Promise<string> {
   return text;
 }
 
-export function splitIntoChunks(text: string, chunkSize = 500): string[] {
-  const words = text.split(" ");
-  const chunks: string[] = [];
+async function embedBatch(
+  texts: string[],
+  inputType: "search_document" | "search_query",
+): Promise<number[][]> {
+  const response = await cohere.embed({
+    texts,
+    model: "embed-english-v3.0",
+    inputType,
+    embeddingTypes: ["float"],
+  });
 
-  for (let i = 0; i < words.length; i += chunkSize) {
-    const chunk = words.slice(i, i + chunkSize).join(" ");
-    if (chunk.trim()) chunks.push(chunk);
+  const embeddings = response.embeddings;
+  if (Array.isArray(embeddings)) return embeddings;
+  if (!embeddings.float) {
+    throw new Error("Cohere did not return float embeddings.");
   }
-
-  return chunks;
+  return embeddings.float;
 }
 
 export async function generateDocumentEmbeddings(
   texts: string[],
 ): Promise<number[][]> {
-  const response = await cohere.embed({
-    texts,
-    model: "embed-english-v3.0",
-    inputType: "search_document",
-    embeddingTypes: ["float"],
-  });
-
-  const embeddings = response.embeddings;
-
-  if (Array.isArray(embeddings)) {
-    return embeddings;
+  const result: number[][] = [];
+  for (let i = 0; i < texts.length; i += EMBED_BATCH_SIZE) {
+    const batch = texts.slice(i, i + EMBED_BATCH_SIZE);
+    result.push(...(await embedBatch(batch, "search_document")));
   }
-
-  if (!embeddings.float) {
-    throw new Error("Cohere tidak mengembalikan float embeddings.");
-  }
-
-  return embeddings.float;
+  return result;
 }
 
 export async function generateQueryEmbedding(text: string): Promise<number[]> {
-  const response = await cohere.embed({
-    texts: [text],
-    model: "embed-english-v3.0",
-    inputType: "search_query",
-    embeddingTypes: ["float"],
-  });
-
-  const embeddings = response.embeddings;
-
-  if (Array.isArray(embeddings)) {
-    return embeddings[0];
-  }
-
-  if (!embeddings.float?.[0]) {
-    throw new Error("Cohere tidak mengembalikan query embedding.");
-  }
-
-  return embeddings.float[0];
+  const [embedding] = await embedBatch([text], "search_query");
+  return embedding;
 }
 
 export async function searchRelevantChunks(

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 import "./globals.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,17 @@ import { TRPCReactProvider } from "@/trpc/client";
 const geist = Geist({
   variable: '--font-geist',
   subsets: ['latin'],
-  weight: "400",
+})
+
+const geistMono = Geist_Mono({
+  variable: '--font-geist-mono',
+  subsets: ['latin'],
+})
+
+const newsreader = Newsreader({
+  variable: '--font-newsreader',
+  subsets: ['latin'],
+  style: ['normal', 'italic'],
 })
 
 export const metadata: Metadata = {
@@ -33,7 +43,12 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("font-sans scroll-smooth", geist.className)}
+      className={cn(
+        "font-sans scroll-smooth",
+        geist.variable,
+        geistMono.variable,
+        newsreader.variable,
+      )}
     >
       <body>
         <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />

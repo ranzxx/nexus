@@ -94,13 +94,10 @@ describe("conversation", () => {
 
     const conv = await createConversation();
 
-    expect(mocks.valuesMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "New Chat",
-        userId: "user-id",
-        documentId: null,
-      }),
-    );
+    expect(mocks.valuesMock).toHaveBeenCalledWith({
+      userId: "user-id",
+      title: "New Chat",
+    });
 
     expect(conv).toEqual(
       expect.objectContaining({
@@ -111,17 +108,13 @@ describe("conversation", () => {
     );
   });
 
-  it("createConversation menyimpan documentId kalau dikirim", async () => {
+  it("createConversation menolak user Free yang sudah punya 10 conversation", async () => {
+    mocks.whereMock.mockResolvedValueOnce([{ value: 10 }]);
+
     const { createConversation } = await import("@/actions/conversation");
 
-    await createConversation("doc-id");
-
-    expect(mocks.valuesMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        userId: "user-id",
-        documentId: "doc-id",
-      }),
-    );
+    await expect(createConversation()).rejects.toThrow("Free plan limit");
+    expect(mocks.insertMock).not.toHaveBeenCalled();
   });
 
   it("createConversation tidak insert ke database kalau user belum login", async () => {
