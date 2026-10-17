@@ -33,7 +33,7 @@ async function assertCanCreateConversation(userId: string, isPro: boolean) {
   }
 }
 
-export async function createConversation(documentId?: string) {
+export async function createConversation() {
   const session = await getSessionOrRedirect();
   const userPlan = (session.user as { plan?: string }).plan;
   const isPro = userPlan === "pro";
@@ -85,28 +85,15 @@ export async function getConversationMessages(conversationId: string) {
     .orderBy(asc(message.createdAt));
 }
 
-export async function saveMessage({
-  conversationId,
-  role,
-  content,
-}: {
-  conversationId: string;
-  role: "user" | "assistant";
-  content: string;
-}) {
-  await db.insert(message).values({ conversationId, role, content });
-
-  await db
-    .update(conversation)
-    .set({ updatedAt: new Date() })
-    .where(eq(conversation.id, conversationId));
-}
-
 export async function updateConversationTitle(id: string, title: string) {
+  const session = await getSessionOrRedirect();
+
   await db
     .update(conversation)
     .set({ title, updatedAt: new Date() })
-    .where(eq(conversation.id, id));
+    .where(
+      and(eq(conversation.id, id), eq(conversation.userId, session.user.id)),
+    );
 }
 
 export async function deleteConversation(id: string) {
@@ -121,11 +108,13 @@ export async function deleteConversation(id: string) {
   revalidatePath("/chat");
 }
 
-export async function deleteEmptyConversations(userId: string) {
+export async function deleteEmptyConversations() {
+  const session = await getSessionOrRedirect();
+
   const conversations = await db
     .select({ id: conversation.id })
     .from(conversation)
-    .where(eq(conversation.userId, userId));
+    .where(eq(conversation.userId, session.user.id));
 
   for (const conv of conversations) {
     const messages = await db

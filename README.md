@@ -172,6 +172,7 @@ INNGEST_SIGNING_KEY=
 # App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
+  > For local development, also set `INNGEST_DEV=1` and any non-empty `INNGEST_EVENT_KEY`.
 
 ### 4. Start PostgreSQL with pgvector
 
@@ -267,20 +268,25 @@ Streamed response
 
 ---
 
+## Known Limitations & Roadmap
+
+- Text-only PDF extraction (no OCR or table understanding)
+- Chunks do not store page numbers, so there are no page-level citations
+- Retrieval quality has not been formally evaluated
+- Upload size is limited to 10 MB on the server, while the Uploadthing router still allows 16 MB
+- `/api/chat` has no rate limiting yet (only tRPC routes do)
+- Sidebar refreshes by polling; planned move to cached queries
+
+---
+
 ## Testing
 
 ```bash
 # Unit tests
 npm run test
 
-# Unit tests watch mode
-npm run test:ui
-
 # E2E tests (requires dev server running)
 npm run test:e2e
-
-# E2E tests with UI
-npm run test:e2e:ui
 ```
 
 ---
@@ -304,7 +310,7 @@ docker run -p 3000:3000 --env-file .env.local nexus
 
 ```
 app/
-├── (app)/ → authenticated app (chat, settings, upgrade)
+├── (app)/ → authenticated app (chat, profile, upgrade)
 ├── (marketing)/ → landing page
 ├── (auth)/ → login, register
 └── api/ → chat, inngest, webhook, uploadthing routes
@@ -326,7 +332,7 @@ components/
 
 db/ → Drizzle schema and client
 lib/ → auth, stripe, rag, uploadthing, logger
-tests/ → Vitest unit tests
+__tests__/ → Vitest unit tests
 e2e/ → Playwright E2E tests
 ```
 

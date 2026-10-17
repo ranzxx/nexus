@@ -4,10 +4,11 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { and, count, eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
-import { conversation } from "@/db/schema";
+import { conversation, conversationDocument } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { generateQueryEmbedding, searchRelevantChunks } from "@/lib/rag";
-import { saveMessage, updateConversationTitle } from "@/actions/conversation";
+import { updateConversationTitle } from "@/actions/conversation";
+import { saveMessage } from "@/lib/messages";
 import logger from "@/lib/logger";
 
 export const runtime = "nodejs";
@@ -142,26 +143,30 @@ export async function POST(request: Request) {
         : ""
     }`;
 
-    const queryEmbedding = await generateQueryEmbedding(userText);
-    const relevantChunks = await searchRelevantChunks(
-      queryEmbedding,
-      currentConversationId,
-    );
+    const [hasDocs] = await db
+      .select({ id: conversationDocument.id })
+      .from(conversationDocument)
+      .where(eq(conversationDocument.conversationId, currentConversationId))
+      .limit(1);
 
-    if (relevantChunks.length > 0) {
-      systemPrompt = `You are a helpful assistant.${
-        isPro
-          ? " You are running on a premium model with enhanced capabilities."
-          : ""
+    if (hasDocs) {
+      const queryEmbedding = await generateQueryEmbedding(userText);
+      const relevantChunks = await searchRelevantChunks(
+        queryEmbedding,
+        currentConversationId,
+      );
+
+      if (relevantChunks.length > 0) {
+        systemPrompt = `You are a helpful assistant.${
+          isPro
+            ? " You are running on a premium model with enhanced capabilities."
+            : ""
+        }
+        Answer questions based on the following document context:
+        ${relevantChunks.join("\n\n")}
+        If the answer is not in the context, say so clearly.`;
       }
-
-Answer questions based on the following document context:
-
-${relevantChunks.join("\n\n")}
-
-If the answer is not in the context, say so clearly.`;
     }
-
     await saveMessage({
       conversationId: currentConversationId,
       role: "user",

@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type Props = {
   id: string;
@@ -55,18 +56,25 @@ export default function ConversationItem({
   const [renameOpen, setRenameOpen] = useState<boolean>(false);
   const [renameValue, setRenameValue] = useState(title);
 
-
   async function handleDelete() {
-    await deleteConversation(id);
-    onDelete(id);
-    if (isActive) router.push("/chat");
+    try {
+      await deleteConversation(id);
+      onDelete(id);
+      if (isActive) router.push("/chat");
+    } catch {
+      toast.error("Failed to delete conversation");
+    }
   }
 
   async function handleRename() {
     if (!renameValue.trim()) return;
-    await updateConversationTitle(id, renameValue.trim());
-    onRename(id, renameValue.trim());
-    setRenameOpen(false);
+    try {
+      await updateConversationTitle(id, renameValue.trim());
+      onRename(id, renameValue.trim());
+      setRenameOpen(false);
+    } catch {
+      toast.error("Failed to rename conversation");
+    }
   }
 
   return (
@@ -75,7 +83,7 @@ export default function ConversationItem({
         <SidebarMenuButton
           asChild
           isActive={isActive}
-          className="text-muted-foreground dark:text-[#a1a1aa] hover:text-foreground dark:hover:text-white hover:bg-muted dark:hover:bg-zinc-800/50 data-[active=true]:text-foreground dark:data-[active=true]:text-white data-[active=true]:border-l-2 data-[active=true]:border-blue-500 data-[active=true]:bg-transparent data-[active=true]:rounded-none rounded-md transition-all duration-200 h-9 px-3"
+          className="h-9 rounded-none px-3 text-muted-foreground dark:text-[#A1A1AA] transition-colors hover:bg-muted dark:hover:bg-[#121212] hover:text-foreground dark:hover:text-[#FAFAFA] data-[active=true]:border-l-2 data-[active=true]:border-foreground dark:data-[active=true]:border-[#FAFAFA] data-[active=true]:bg-muted dark:data-[active=true]:bg-[#121212] data-[active=true]:text-foreground dark:data-[active=true]:text-[#FAFAFA]"
         >
           <Link
             href={`/chat/${id}`}
@@ -92,7 +100,7 @@ export default function ConversationItem({
                     e.preventDefault();
                     e.stopPropagation();
                   }}
-                  className="shrink-0 cursor-pointer rounded p-1 opacity-0 transition-opacity hover:bg-muted dark:hover:bg-zinc-800/50 group-hover/item:opacity-100"
+                  className="shrink-0 cursor-pointer p-1 transition-opacity hover:bg-muted dark:hover:bg-[#27272A] md:opacity-0 md:group-hover/item:opacity-100 focus-visible:opacity-100 data-[state=open]:opacity-100"
                 >
                   <MoreHorizontal size={14} />
                 </button>

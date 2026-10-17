@@ -4,9 +4,9 @@ import { document, chunk } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import {
   extractTextFromPDF,
-  splitIntoChunks,
   generateDocumentEmbeddings,
 } from "@/lib/rag";
+import { splitIntoChunks } from "@/lib/chunk-text";
 import { logger } from "@/lib/logger";
 import * as Sentry from "@sentry/nextjs";
 

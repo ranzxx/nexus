@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Bot, User } from "lucide-react";
@@ -20,36 +20,53 @@ interface ChatMessageProps {
 }
 
 export function ChatMessage({ message }: ChatMessageProps) {
-  const textContent = message.content || (message.parts?.map(p => p.type === 'text' ? p.text : '').join('') ?? "");
+  const textContent =
+    message.content ||
+    (message.parts?.map((p) => (p.type === "text" ? p.text : "")).join("") ??
+      "");
+  const isUser = message.role === "user";
 
   return (
-    <div className={`flex gap-4 w-full ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-      {message.role !== "user" && (
-        <Avatar className="w-8 h-8 shrink-0 mt-0.5 border border-border dark:border-[#27272a]">
-          <AvatarFallback className="bg-muted dark:bg-[#18181b] text-foreground dark:text-white">
-            <Bot className="w-4 h-4" />
+    <div
+      className={`flex w-full gap-3 ${isUser ? "justify-end" : "justify-start"}`}
+    >
+      {!isUser && (
+        <Avatar className="mt-0.5 h-8 w-8 shrink-0 rounded-none border border-border dark:border-[#27272A]">
+          <AvatarFallback className="rounded-none bg-card dark:bg-[#121212] text-foreground dark:text-[#FAFAFA]">
+            <Bot className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
       )}
-      
+
       <div
-        className={`max-w-[85%] text-sm leading-relaxed overflow-x-hidden ${
-          message.role === "user"
-            ? "bg-muted dark:bg-[#18181b] text-foreground dark:text-white rounded-2xl rounded-tr-sm px-5 py-3 border border-border/50 dark:border-[#27272a]/50"
-            : "text-foreground dark:text-[#e5e1e4] py-1 w-full"
+        className={`flex min-w-0 max-w-[85%] flex-col gap-1.5 ${
+          isUser ? "items-end" : "w-full"
         }`}
       >
-        {message.role === "user" ? (
-          <span className="whitespace-pre-wrap wrap-break-word">{textContent}</span>
-        ) : (
-          <MarkdownRenderer content={textContent} />
-        )}
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground dark:text-[#A1A1AA]">
+          {isUser ? "You" : "Nexus"}
+        </span>
+        <div
+          className={`overflow-x-hidden border text-sm leading-relaxed ${
+            isUser
+              ? "border-border dark:border-[#27272A] bg-muted dark:bg-[#121212] px-4 py-3 text-foreground dark:text-[#FAFAFA]"
+              : "w-full border-border dark:border-[#27272A] bg-card dark:bg-[#121212] px-5 py-4 text-foreground dark:text-[#E5E1E4]"
+          }`}
+        >
+          {isUser ? (
+            <span className="whitespace-pre-wrap wrap-break-word">
+              {textContent}
+            </span>
+          ) : (
+            <MarkdownRenderer content={textContent} />
+          )}
+        </div>
       </div>
-      
-      {message.role === "user" && (
-        <Avatar className="w-8 h-8 shrink-0 mt-0.5 border border-border dark:border-[#27272a]">
-          <AvatarFallback className="bg-muted dark:bg-[#18181b] text-foreground dark:text-white">
-            <User className="w-4 h-4" />
+
+      {isUser && (
+        <Avatar className="mt-0.5 h-8 w-8 shrink-0 rounded-none border border-border dark:border-[#27272A]">
+          <AvatarFallback className="rounded-none bg-card dark:bg-[#121212] text-foreground dark:text-[#FAFAFA]">
+            <User className="h-4 w-4" />
           </AvatarFallback>
         </Avatar>
       )}

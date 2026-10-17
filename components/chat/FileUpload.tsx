@@ -77,7 +77,7 @@ export default function FileUpload({
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={isBusy}
-        className="w-8 h-8 min-w-8 p-0 rounded-md bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50"
+        className="w-8 h-8 min-w-8 p-0 rounded-none bg-transparent text-muted-foreground hover:bg-muted hover:text-foreground flex items-center justify-center transition-colors disabled:opacity-50"
       >
         {isBusy ? (
           <Loader2 className="w-5 h-5 animate-spin" />

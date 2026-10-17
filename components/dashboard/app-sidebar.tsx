@@ -18,7 +18,7 @@ import ThemeToggle from "../marketing/theme-toggle";
 import { NavUser } from "./nav-user";
 import { useEffect, useState } from "react";
 import { getConversations } from "@/actions/conversation";
-import { PlusCircleIcon } from "lucide-react";
+import { Plus } from "lucide-react";
 import ConversationItem from "./conversation-item";
 import { Skeleton } from "../ui/skeleton";
 
@@ -35,28 +35,40 @@ export default function AppSidebar() {
     useState<boolean>(true);
 
   useEffect(() => {
-    getConversations().then((data) => {
-      setConversations(data);
-      setIsLoadingConversations(false);
-    });
+    let cancelled = false;
 
+    const load = () =>
+      getConversations()
+        .then((data) => {
+          if (!cancelled) setConversations(data);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) setIsLoadingConversations(false);
+        });
+
+    load();
     const interval = setInterval(() => {
-      getConversations().then(setConversations);
+      if (!document.hidden) load();
     }, 3000);
 
-    return () => clearInterval(interval);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, []);
 
   return (
-    <Sidebar className="border-r border-border dark:border-[#27272a] bg-card dark:bg-[#09090b] text-muted-foreground dark:text-[#a1a1aa]">
-      <SidebarHeader className="p-6 border-b border-border dark:border-[#27272a]">
+    <Sidebar className="border-r border-border dark:border-[#27272A] bg-card dark:bg-[#0A0A0A] text-muted-foreground dark:text-[#A1A1AA]">
+      <SidebarHeader className="h-16 justify-center px-6 py-0 border-b border-border dark:border-[#27272A]">
         <Link
           href="/chat"
-          className="font-semibold text-lg text-foreground dark:text-white flex items-center gap-2"
+          className="flex items-center text-foreground dark:text-[#FAFAFA]"
         >
-          Nexus
+          <span className="text-lg font-semibold tracking-tight">Nexus</span>
         </Link>
       </SidebarHeader>
+
       <SidebarContent className="px-3 py-4">
         <SidebarGroup>
           <SidebarGroupContent>
@@ -64,10 +76,10 @@ export default function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  className="bg-foreground text-background hover:bg-foreground/90 hover:text-background dark:bg-white dark:text-black dark:hover:bg-white/90 dark:hover:text-black font-medium w-full justify-start rounded-md shadow-sm h-10 px-4"
+                  className="h-10 w-full justify-center gap-2 rounded-none border border-border dark:border-[#27272A] bg-transparent font-mono text-xs uppercase tracking-[0.14em] text-foreground dark:text-[#FAFAFA] hover:bg-muted dark:hover:bg-[#121212]"
                 >
                   <Link href="/chat">
-                    <PlusCircleIcon className="w-5 h-5 mr-2" />
+                    <Plus className="h-4 w-4" />
                     <span>New chat</span>
                   </Link>
                 </SidebarMenuButton>
@@ -77,15 +89,15 @@ export default function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup className="mt-5">
-          <SidebarGroupLabel className="text-muted-foreground/70 dark:text-[#a1a1aa]/70 text-xs font-semibold tracking-wider uppercase px-2 mb-2">
-            Recent Chats
+          <SidebarGroupLabel className="mb-2 px-2 font-mono text-[11px] font-normal uppercase tracking-[0.14em] text-muted-foreground dark:text-[#A1A1AA]">
+            Recent chats
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {isLoadingConversations
                 ? Array.from({ length: 4 }).map((_, i) => (
                     <SidebarMenuItem key={i} className="px-3 py-1.5">
-                      <Skeleton className="h-6 w-full rounded" />
+                      <Skeleton className="h-6 w-full rounded-none" />
                     </SidebarMenuItem>
                   ))
                 : conversations.length > 0
@@ -116,8 +128,8 @@ export default function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
-      <SidebarFooter className="p-4 border-t border-border dark:border-[#27272a] flex flex-row items-center justify-between">
+
+      <SidebarFooter className="flex flex-row items-center justify-between border-t border-border dark:border-[#27272A] p-4">
         <NavUser />
         <ThemeToggle size={"icon-lg"} />
       </SidebarFooter>
